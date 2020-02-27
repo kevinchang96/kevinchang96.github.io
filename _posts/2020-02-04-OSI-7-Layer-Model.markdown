@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "OSI 7-Layer Model"
-
+author: "Kevin Chang"
 ---
 
 The Open Systems Interconnection model (OSI model) is a conceptual model developed by the International Standards Organization (ISO) to define the functions and responsibilities of a networking system. The system is divided into seven separate abstract layers, each relying on the abstract layers below it in order to fulfill its own specific job and protocol. The layers are illustrated bottom-up as follows: physical, data link, network, transport, session, presentation, and application. Note that the OSI model is bidirectional, so while a top-down explanation is possible, we choose to proceed with a bottom-up exploration of the model, as it is understood each layer builds upon the functionality of the previous. We begin with the physical layer.
