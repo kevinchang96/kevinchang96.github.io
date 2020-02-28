@@ -1,0 +1,114 @@
+---
+layout: post
+title: "DNS"
+author: "Kevin Chang"
+---
+
+DNS
+
+2:50 PM Feb 11, 2020
+
+
+
+Domain Name System (DNS) is the mechanism through which domain names like www.google.com is translated to the IP address of the appropriate corresponding servers. DNS is commonly analogized as a phonebook where one can look up a person’s name to discover their phone number in order to reach that person. In a similar way, DNS can look up a server’s domain name to discover its IP address in order to communicate with that server. This mapping implicitly requires all devices connected to the internet to have a unique IP address. Note that this discussion strictly refers to IPv4 addresses. For those interested in learning more about IPv4 (or IPv6), please refer to this discussion.
+
+
+
+DNS is most easily understood through a practical example highlighting all the moving components required in order to simply resolve a server’s IP address. Suppose that a user wants to reach www.capitalone.com using their favorite browser.
+
+
+
+If the IP address of the particular domain name is not cached in the application, then a query for the IP address is routed to a recursive DNS resolver which is typically the user’s Internet service provider (ISP).
+If the IP address has already been cached by the browser, then the browser sends the original network request with the appropriate IP address.
+If the requested IP address is not cached in the resolver, then the resolver makes a query on the user’s behalf to the root name servers. 
+If the IP address has already been cached, then the resolver returns the requested IP address to the requesting device.
+The root name server (.) provides the resolver with the address of a Top Level Domain (TLD) DNS server. In our case, the root name server returns the address for the .com TLD.
+The resolver makes a query to the TLD server using the IP address provided by the root name server in the previous step. The TLD server provides the resolver with the address of the name servers responsible for the particular domain. In our case, the TLD server returns the address of the name servers responsible for the capitalone.com domain.
+The resolver makes a query to the name servers using the IP address provided by the TLD server in the previous step. The name server looks in the capitalone.com hosted zone for the www.capitalone.com record.
+If the record containing the associated IP address for the web server is found, then the name server returns that address to the resolver.
+After obtaining the IP address of the web server, the DNS resolver returns that address to the original client browser.
+The resolver will cache this address for a specified Time-To-Live (TTL) value.
+Lastly, the client browser makes a request to the web server for web content using the IP address resolved by the ISP’s recursive DNS resolver.
+The browser will cache this address for a specified TTL value.
+
+
+Terminology
+
+
+
+What is a domain name?
+
+The domain name consists of the TLD and all subsequent subdomains appended to the left of the TLD, separated by dots. In our example, capitalone.com is the domain name.
+
+
+
+What is a Top Level Domain (TLD)?
+
+The TLD refers to the last part of the domain name. In our example, .com is the TLD. The following is a list of TLDs:
+
+Com - commercial businesses
+Gov - U.S. government agencies
+Edu - educational institutions
+Org - organizations
+Mil - Military organizations
+Net - Network organizations
+Eu - European Union
+
+
+What is a Canonical Name (CNAME)?
+
+A record establishing one domain as an alias to another domain, whereby all traffic directed at the alias CNAME is routed to the original domain.
+
+
+
+What is an Address Mapping (A) Record?
+
+A record containing the mapping between a domain name and its corresponding IPv4 address.
+
+
+
+What is an IPv6 Address (AAAA) Record?
+
+A record containing the mapping between a domain and its corresponding IPv6 address.
+
+
+
+What is a Mail Exchanger (MX) Record?
+
+A record containing the mapping between a domain name and a list of mail exchange servers for that domain. 
+
+
+
+What is a Reverse-Lookup Pointer (PTR) Record?
+
+Used to lookup the domain name based on an IP address.
+
+
+
+What is a Name Server (NS) Record?
+
+A record containing the mapping between a domain name and a list of authoritative domain name servers.
+
+
+
+What is a Start of Authority (SOA) Record?
+
+A record specifying which domain name server is the authoritative source of information regarding a domain.
+
+
+
+References:
+
+https://aws.amazon.com/route53/what-is-dns/
+
+https://www.cloudflare.com/learning/dns/what-is-dns/
+
+https://www.verisign.com/en_US/website-presence/online/how-dns-works/index.xhtml
+
+https://ns1.com/resources/what-is-dns
+
+https://mediatemple.net/community/products/dv/204403924/dns-explained
+
+https://cloudacademy.com/blog/how-dns-works/
+
+https://dyn.com/blog/dns-why-its-important-how-it-works/

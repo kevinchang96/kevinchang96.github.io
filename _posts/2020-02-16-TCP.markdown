@@ -1,0 +1,91 @@
+---
+layout: post
+title: "IPv4"
+author: "Kevin Chang"
+---
+
+TCP
+
+3:35 PM Feb 16, 2020
+
+
+
+The combination of the Transport Control Protocol (TCP) and the Internet Protocol (IP), make up the IP suite, also known as TCP/IP. In a previous post, we explored the IP layer; namely IPv4. TCP and IP work in concert with each other to achieve a singular goal—end-to-end data communication between devices—TCP and IP cannot be used synonymously as they each accomplish separate, but equally important tasks. While IP handles addressing and packet routing, TCP makes up for all the aspects that IP lacks. While IP is a connectionless protocol, TCP is a connection-oriented protocol focused on providing reliable data integrity, proper data sequencing, and data duplication avoidance.
+
+
+
+Therefore with the combination of TCP and IP, TCP relies on IP to handle all the addressing and routing of packets, while it is concerned with making sure the communication is smooth and seamless. In this way, data can be divided into packets, sent off traveling in different routes, and reassembled when all the datas arrive at the destination device. Simplistically, TCP follows 3 fundamental steps.
+
+
+
+Firstly, TCP establish a connection between devices through the “3-way handshake.” Imagine two devices, A and B, that want to start a communication channel with each other. Relying on IP as the foundation for the communication, the following procedure occurs.
+
+A sends a “SYN” (synchronize) packet to B.
+If A does not receive any “ACK” (acknowledge) packets from B, then A will resend SYN packets until it receives a response.
+Once B receives the SYN packet from A, B will respond by sending both an ACK packet and SYN packet to A.
+If B does not receive any ACK packets from A, then B will resend both ACK and SYN packets until it receives a response.
+Once A receives the ACK packet from B, it has successfully sent B a message and received a response back. To finish the handshake, A must acknowledge that it has received the SYN packet from B by sending it an ACK packet.
+As we can see, if no issues occur, then this process is simplified as a 3-step protocol to establish a connection between both parties involved in the communication.
+
+
+
+Once the connection has been establishes, every time a device sends data, the receiving device will respond with an ACK to confirm the reception of the data. Otherwise the sending device will resend the specific packet of data for which it did not receive a corresponding ACK within a specified period of time.
+
+
+
+Finally, similar to the initial 3-way handshake to establish a connection, there is an analogous 3-way handshake to end a connection between devices. Again imagine two devices, A and B, that want to terminate a communication channel.
+
+A sends a “FIN” (finish) packet to B
+If A does not receive any ACK packets from B, then A will resend FIN packets until it receives a response.
+Once B receives the FIN packet from A, B will respond by sending both an ACK packet and a FIN packet to A.
+If B does not receive any ACK packets from A, then B will resend both ACK and FIN packets until it receives a response.
+Once A receives the ACK packet from B, it knows that B has received its request to end the connection and has acknowledged this request. To finish the handshake, A must acknowledge that it has received the FIN packet from B by sending it a final ACK packet.
+As we can see, this protocol is nearly identical to the opening 3-way handshake except the SYN packets have been swapped with FIN packets.
+
+
+
+To understand, how TCP manages all the moving pieces to provide reliable transmission, it is informative to take a look at the composition of a TCP header packet and see all the 
+
+Source Port [16] - the sending port
+Destination Port [16] - the receiving port
+Sequence Number [32]
+if the SYN flag is set, then this is the initial sequence number and there is no data contained in this packet. The sequence number of the first data byte is this sequence number plus one
+If the SYN flag is clear, then this is the sequence number of the first data byte of this segment for the current session
+Acknowledgement Number [32] - the value of the next sequence number that the sender of the ACK is expecting to receive if the ACK flag is set
+Data Offset [4] - size of the header; indicates where the data starts
+Reserved [3] - reserved for future use and set to zero
+Explicit Congestion Notification (ECN) [3] - (big endian starting from the left)
+1: Nonce Sum - concealment protection
+2: Congestion Window Reduced (CWR) - indicates that the sending host received a TCP segment with the ECE flag set and had responded in congestion control mechanism
+4: ECN Echo (ECE)
+If the SYN flag is set, then the TCP peer is ECN capable
+If the SYN flag is clear, then a packet with the ECN flag set indicates (future) network congestion to the TCP sender
+Control Bits [6] - (big endian starting from the left)
+1: Urgent (URG) pointer flag
+2: Acknowledgement (ACK) number valid flag
+4: Push (P) flag
+8: Reset (R) connection flag
+16: Synchronize (SYN) sequence numbers flag
+32: Finish (FIN) of data transmission flag
+Window [16] - the size of the receiving window, indicating the number of window-sized units (bytes, by default) that the sender of this segment is willing to receive
+Checksum [16] - used to error-check the header
+Urgent Pointer [16] - indicates the offset from the sequence number of the last urgent data byte if the URG flag is set
+Options [0-320] - different options, to learn more click [here](https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml)
+Padding
+
+
+Possibly most noteworthy is the **sequence number** and **acknowledgement number** which provide the capability of reliable transmission and error detection. To transmit reliably, one must protect against incorrect packet ordering, packet duplication, and packet loss. Therefore packets can be reconstructed in the proper order through the sequence number. Note that the initial sequence number starting off the sequence should be arbitrary to safeguard against [TCP sequence prediction attacks](https://en.wikipedia.org/wiki/TCP_sequence_prediction_attack). Furthermore, the acknowledgement number indicates the value of the sequence number that it is expecting to receive. Since acknowledgment numbers are cumulative, this indicates that the receiver has received all packets up to but excluding the sequence number that it is expecting to receive. For example if there is a sequence of sequence numbers from 1 to 10 and the packets with sequence numbers 6 and 9 were lost. Then the receiving device would send **6** as the acknowledgement number until it receives the sequence number 6 packet. Once it has received that packet, then the receiver will continually send **9** until it receives the sequence number 9 packet, and so forth. If the receiver sends 3 duplicate acknowledgment packets, then the sender will resend the last unacknowledged packet. 
+
+
+
+References:
+
+https://en.wikipedia.org/wiki/Internet_protocol_suite
+
+https://www.extrahop.com/resources/protocols/tcp/
+
+http://www.networksorcery.com/enp/protocol/tcp.htm
+
+https://searchnetworking.techtarget.com/definition/TCP
+
+https://www.cloudflare.com/learning/ddos/glossary/tcp-ip/

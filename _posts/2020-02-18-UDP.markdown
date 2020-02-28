@@ -1,0 +1,43 @@
+---
+layout: post
+title: "UDP"
+author: "Kevin Chang"
+---
+
+UDP
+
+5:00 PM Feb 18, 202
+
+
+
+User Datagram Protocol (UDP) is the sibling of TCP in that they are both transport layer protocols. However UDP differs from TCP in many important ways, making their use-cases drastically different. While the complex nature of TCP provide a reliable connection between two devices, the simple nature of UDP provides performant, albeit unreliable transmission of data between two devices. Similar to IP, UDP is a connectionless protocol operating on a best-effort delivery model. It splits data into packets called datagrams and sends them to the appropriate destination device over IP. UDP does not require the “handshakes” that are required by TCP. As a result, data can be sent to the receiving device without an acknowledgement or agreement of communication from the receiving device. Consequently, the reduced responsibility of UDP relegates it to situations where transmissions are time-sensitive such as Voice over IP (VoIP), online multiplayer gaming, live video streams. The keen reader may notice that UDP does not provide any datagram ordering, error control, flow control so its lowered requirements achieve speedier transmission at the cost of many quality checks.
+
+
+
+The UDP header is fixed at 64 bits and is composed of the following.
+
+Source Port [16] - the sending port
+Destination Port [16] - the receiving port
+Length [16] - size of the UDP packet including header and data; minimum value is 64 bits, the length of the header
+Checksum [16] - the 16-bit 1’s complement of the 1’s complement sum of the pseudo header; if the checksum is cleared, then checksumming is disabled.
+
+
+To add more detail in how the checksum computation occurs, a 1’s complement sum is derived from the IP header, UDP header, and the data. If a carry bit is derived from any of the 1’s complement arithmetic addition, then the carry bit is added to the least significant bit of the running total. In the end, the final sum is once more 1’s complemented to produce the final UDP checksum value. Note that the checksum is optional for IPv4, but it is mandatory for IPv6.
+
+
+
+References:
+
+https://en.wikipedia.org/wiki/User_Datagram_Protocol
+
+https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/
+
+https://www.geeksforgeeks.org/user-datagram-protocol-udp/
+
+http://www.networksorcery.com/enp/protocol/udp.htm
+
+https://www.sdxcentral.com/resources/glossary/user-datagram-protocol-udp/
+
+https://www.howtogeek.com/190014/htg-explains-what-is-the-difference-between-tcp-and-udp/
+
+https://support.holmsecurity.com/hc/en-us/articles/212963869-What-is-the-difference-between-TCP-and-UDP-
