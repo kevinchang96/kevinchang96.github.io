@@ -30,6 +30,8 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  kevinchang96
 linkedin_username: kevinchang96
 
+excerpt_separator: "<!--more-->"
+
 # Build settings
 theme: minima
 plugins:

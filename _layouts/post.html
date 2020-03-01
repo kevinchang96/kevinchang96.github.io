@@ -2,13 +2,15 @@
 layout: default
 ---
 <article>
-<h1 class="post-title" style="text-align:center;margin-top:50px">{{ page.title }}</h1>
-<h3 class="post-subtitle" style="text-align:center">{{ page.date | date_to_string }} - {{ page.author }}</h3>
-
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-lg-2 col-md-1 mx-auto"></div>
-			<div class="col-lg-8 col-md-10 mx-auto" style="text-align:center">
+			<div class="col-lg-4 col-md-1 mx-auto"></div>
+			<div class="col-lg-6 col-md-10 mx-auto">
+				<h1 class="post-title" style="margin-top:50px"><b>{{ page.title }}</b></h1>
+				<h4 class="post-subtitle">By: {{ page.author }}</h4>
+				<h5 class="post-subtitle">{{ page.date | date_to_string }}</h5>
+				<br>
+				<hr>
 				{{ content }}
 			</div>
 			<div class="col-lg-2 col-md-1 mx-auto"></div>

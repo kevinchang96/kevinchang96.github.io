@@ -1,18 +1,20 @@
-<section class="no-padding" id="blog">  
-  <aside class="bg-dark">
-      <div class="container text-center">
-          <div class="call-to-action">
-              <h2>Latest Posts</h2>
-				<ul style="list-style-type:none;">
+<section class="no-padding" id="blog"> 
+	<aside class="bg-dark">
+		<div class="container text-center">
+		  <div class="call-to-action">
+			  <h2>Latest Posts</h2>
+			  <hr class="primary">
+		  </div>
+		</div>
+		<div class="container text-center">
+			<ul style="list-style-type:none;padding-left:0;">
 				{% for post in site.posts %}
-					<li>
+				<li>
 					<h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
 					<p>{{ post.excerpt }}</p>
-					</li>
+				</li>
 				{% endfor %}
-				</ul>
-              <a href="#" class="btn btn-default btn-xl wow tada">Download Now!</a>
-          </div>
-      </div>
-  </aside>
+			</ul>
+		</div>
+	</aside>
 </section>
