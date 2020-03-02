@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 
-{% include post-head.html %}
+{% include head.html %}
 
   <body id="page-top">
-	{% include default-nav.html %}
-    {{ content }}
-	{% include post-scripts.html %}
+  {% include default-nav.html %}
+  
+  <div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-3 col-md-1 mx-auto">
+        <article style="margin-top:60px">
+          <a href="#">
+            <img style="border-radius:50%;background-clip:padding-box;width:108px;height:auto;margin-bottom:.75rem;float:left;margin-right:20px;float:none;" src="{{ '/img/profile.jpg' | relative_url }}"/>
+          </a>
+          <h4 class="h4">Kevin Chang</h4>
+          <p>Software Engineer</p>
+        </article>
+      </div>
+			<div class="col-lg-8 col-md-10 mx-auto">
+				{{ content }}
+			</div>
+			<div class="col-lg-1 col-md-1 mx-auto"></div>
+		</div>
+	</div>
+	{% include scripts.html %}
 	{% include contact.html %}
   </body>
 </html>
