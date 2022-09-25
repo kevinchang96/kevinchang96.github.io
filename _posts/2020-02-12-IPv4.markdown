@@ -3,33 +3,130 @@ layout: post
 title: "IPv4"
 author: "Kevin Chang"
 date: "2020-02-12 15:30:00"
+update_date: "2022-09-25 01:05:00"
+
 ---
 
-As the name suggests, IPv4 is the fourth version of the Internet Protocol (IP). Generally, an internet protocol specifies how each device within a network is addressed and handles how data is packetized and routed in order to facilitate communication between devices within the same local network and between different networks. Note that IPv4 is a connectionless protocol operating on a best-effort delivery model. This means that following this protocol does not guarantee delivery of data nor does it guarantee data integrity, proper data sequencing, and data duplication avoidance. These issues are addressed through an upper layer transport protocol; namely, the Transmission Control Protocol (TCP). Thus the combination of IP and TCP comprise the IP suite, also known as TCP/IP, which provides end-to-end communication through governance of addressing, packeting, transmission, and routing. More information on TCP can be found in this post, however we continue by diving deeper into IPv4.
+Generally, an internet protocol specifies how each device within a network is addressed and how data is packetized and routed through the network. This facilitates communication between devices within the same local network and between different networks. In particular, IPv4 is the fourth version of the Internet Protocol (IP), which is a connectionless protocol operating on a best-effort delivery model. This means that adherence to this protocol does not guarantee delivery of data nor does it guarantee data integrity, proper data sequencing, or data duplication avoidance. These issues are addressed through an upper layer transport protocol; namely, the Transmission Control Protocol (TCP). Thus the combination of IP and TCP comprise the IP suite, also known as TCP/IP, which provides end-to-end communication through governance of addressing, packeting, transmission, and routing. More information on TCP can be found in this [post](https://kevinchang96.github.io/2020/02/16/TCP.html). We procede by diving deeper into IPv4.
 
 <!--more-->
 
-IPv4 handles device addressing through the use of a 32-bit address space. This is most commonly represented using dot-decimal notation, where an address containing four octets are separated by dots. Each octet represents 8 bits which, when converted from binary, denotes a decimal value between 0 and 255 inclusive. The keen observer may note that the address space is consequently finitely limited to 4,294,967,296 (2^32) unique addresses. As a result of the explosive growth of internet devices and the limited number of unique IPv4 addresses, there is an ongoing transition to using IPv6 as the IP layer of the IP suite.
+IPv4 handles device addressing through the use of a 32-bit address space. This is most commonly represented using dot-decimal notation, where an address containing four octets are separated by dots. Each octet represents 8 bits which, when converted from binary, denotes a decimal value between `0` and `255`, inclusive. The keen observer may note that the address space is consequently finitely limited to `4,294,967,296` `(2^32)` unique addresses. As a result of the explosive growth of internet devices and the limited number of unique IPv4 addresses, there is an ongoing transition to using IPv6 as the IP layer of the IP suite.
 
-Moreover, the composition of the address provides information regarding the network and the host. In particular, the address can be divided into two sections; the network prefix and the host number. For example, the value of the first two octets can represent the network identifier while the value of the last two octets can represent the host identifier. Note that the address does not have to be segmented equally. Furthermore, the length of the network prefix gives insight to the network class: class A, class B, class C. Class A uses only the first octet to specify the network prefix. Subsequently, class B uses the first two octets to specify the network prefix. Lastly, class C uses the first three octets to specify the network prefix. As a result of this convention, class A networks contain the most unique host identifiers, followed by class B networks, and then by class C networks; in that order. However take note that there are many more class C networks than class B networks and there are many more class B networks than there are class A networks.
+Moreover, the composition of the address provides information regarding the network and the host. In particular, the address can be divided into two sections; the network prefix and the host number. For example, the value of the first two octets can represent the network identifier while the value of the last two octets can represent the host identifier. Note that the address does not have to be segmented equally. Furthermore, the length of the network prefix gives insight to the network class: class A, class B, class C.
 
-Additionally, IPv4 specifies how data are packeted such that large chunks of data can be divided and sent through the network. IP packets are comprised of a header section and a data section. The header section consists of 14 fields--last field is optional (Options field)--the most significant bit starts from the left (big endian), and the entire header section contains no more than 480 bits. Below is a diagram illustrating the packet header as well as a brief description of each field; the number in square brackets describes the bit length of the field.
+- Class A uses only the first octet to specify the network prefix.
+- Class B uses the first two octets to specify the network prefix.
+- Class C uses the first three octets to specify the network prefix.
+
+As a result of this convention, class A networks contain the most unique host identifiers, followed by class B networks, and then by class C networks; in that order. However take note that there are many more class C networks than class B networks and there are many more class B networks than there are class A networks.
+
+Additionally, IPv4 specifies how data are packeted such that large chunks of data can be divided and sent through the network. IP packets are comprised of a header section and a data section. The header section consists of 14 fields--last field is optional (Options field). The most significant bit starts from the left (big endian) and the entire header section contains no more than 480 bits. Below is a table illustrating the packet header field, the bit length, and a brief description.
 
 ---
 
-Version [4] - internet protocol version
-Internet Header Length (IHL) [4] - length of the header in 32-bit words; minimum value is 160 bits (20 bytes) and maximum value is 480 bits (60 bytes).
-Differentiated Services Code Point (DSCP) [6] - transmission priority of packet (low delay, high throughput, reliability); Quality of Service
-Explicit Congestion Notification (ECN) [2] - carries information regarding network congestion; only effective when supported by both ends of communication
-Total Length [16] - length of the total packet including header and data; minimum length is 20 bytes and maximum length is 60 bytes.
-Identification [16] - IP packet identification number if the packet is fragmented
-Flags [3]
+<table>
+    <colgroup>
+        <col width="27%" />
+        <col width="8%" />
+        <col width="65%" />
+    </colgroup>
+<thead>
+    <tr class="header">
+        <th style="text-align:center">Segment</th>
+        <th># of Bits</th>
+        <th style="text-align:center">Definition</th>
+    </tr>
+</thead>
+<tbody>
+    <tr height="45px">
+        <td markdown="span">Version</td>
+        <td style="text-align:center" markdown="span">4</td>
+        <td markdown="span">internet protocol version</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Internet Header Length (IHL)</td>
+        <td style="text-align:center" markdown="span">4</td>
+        <td markdown="span">length of the header in 32-bit words; minimum value is 160 bits (20 bytes) and maximum value is 480 bits (60 bytes)</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Differentiated Services Code Point (DSCP)</td>
+        <td style="text-align:center" markdown="span">6</td>
+        <td markdown="span">transmission priority of packet (low delay, high throughput, reliability); Quality of Service</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Explicit Congestion Notification (ECN)</td>
+        <td style="text-align:center" markdown="span">2</td>
+        <td markdown="span">carries information regarding network congestion; only effective when supported by both ends of communication</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Total Length</td>
+        <td style="text-align:center" markdown="span">16</td>
+        <td markdown="span">length of the total packet including header and data; minimum length is 20 bytes and maximum length is 60 bytes</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Identification</td>
+        <td style="text-align:center" markdown="span">16</td>
+        <td markdown="span">IP packet identification number if the packet is fragmented</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Flags</td>
+        <td style="text-align:center" markdown="span">3</td>
+        <td markdown="span"><b>Bit 0</b> - Reserved; must be zero<br><b>Bit 1</b>: Don't fragment - do not fragment the packet; if network does not support current packet length, then the packet is dropped<br><b>Bit 2</b>: More fragments - more fragments to come</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Fragment Offset</td>
+        <td style="text-align:center" markdown="span">13</td>
+        <td markdown="span">position of fragment in packet</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Time To Live (TTL)</td>
+        <td style="text-align:center" markdown="span">8</td>
+        <td markdown="span">restricts the number of hops a packet can travel through a router in a network; decremented by one each time a packet arrives at a router</td>
+    </tr>
+    <tr height="180px">
+        <td markdown="span">Protocol</td>
+        <td style="text-align:center" markdown="span">8</td>
+        <td markdown="span">protocol used in the data portion of the packet<br><b>1</b>: Internet Control Message Protocol (ICMP)<br><b>2</b>: Internet Group Management Protocol (IGMP)<br><b>6</b>: Transmission Control Protocol (TCP)<br><b>17</b>: User Datagram Protocol (UDP)<br><b>41</b>: IPv6 encapsulation (ENCAP)<br><b>89</b>: Open Shortest Path First (OSPF)<br><b>132</b>: Stream Control Transmission Protocol (SCTP)</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Header Checksum</td>
+        <td style="text-align:center" markdown="span">16</td>
+        <td markdown="span">error-checking of the header; after verification, router must calculate new checksum after decrementing the TTL field</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Source IP address</td>
+        <td style="text-align:center" markdown="span">32</td>
+        <td markdown="span">IP address of the source device</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Destination IP address</td>
+        <td style="text-align:center" markdown="span">32</td>
+        <td markdown="span">IP address of the destination device</td>
+    </tr>
+    <tr height="45px">
+        <td markdown="span">Options</td>
+        <td style="text-align:center" markdown="span">0+</td>
+        <td markdown="span">may contain values for options such as security, record route, time stamp, etc...</td>
+    </tr>
+</tbody>
+</table>
+
+<!-- |Segment | Definition|
+| ------ | -------- |
+| Version [4] | internet protocol version |
+| Internet Header Length (IHL) [4] | length of the header in 32-bit words; minimum value is 160 bits (20 bytes) and maximum value is 480 bits (60 bytes) |
+| Differentiated Services Code Point (DSCP) [6] | transmission priority of packet (low delay, high throughput, reliability); Quality of Service |
+| Explicit Congestion Notification (ECN) [2] | carries information regarding network congestion; only effective when supported by both ends of communication |
+| Total Length [16] | length of the total packet including header and data; minimum length is 20 bytes and maximum length is 60 bytes |
+| Identification [16] | IP packet identification number if the packet is fragmented |
+| Flags [3] |
 Bit 0 - Reserved; must be zero
 Bit 1: Don't fragment - do not fragment the packet; if network does not support current packet length, then the packet is dropped
-Bit 2: More fragments - more fragments to come
-Fragment Offset [13] - position of fragment in packet
-Time To Live (TTL) [8] - restricts the number of hops a packet can travel through a router in a network; decremented by one each time a packet arrives at a router
-Protocol [8] - protocol used in the data portion of the packet; below is a list of common payload protocols.
+Bit 2: More fragments - more fragments to come |
+| Fragment Offset [13] | position of fragment in packet |
+| Time To Live (TTL) [8] | restricts the number of hops a packet can travel through a router in a network; decremented by one each time a packet arrives at a router |
+| Protocol [8] | protocol used in the data portion of the packet; below is a list of common payload protocols 
 1: Internet Control Message Protocol (ICMP)
 2: Internet Group Management Protocol (IGMP)
 6: Transmission Control Protocol (TCP)
@@ -37,10 +134,10 @@ Protocol [8] - protocol used in the data portion of the packet; below is a list 
 41: IPv6 encapsulation (ENCAP)
 89: Open Shortest Path First (OSPF)
 132: Stream Control Transmission Protocol (SCTP)
-Header Checksum [16] - error-checking of the header; after verification, router must calculate new checksum after decrementing the TTL field
-Source IP address [32] - IP address of the source device
-Destination IP address [32] - IP address of the destination device
-Options [0-] - may contain values for options such as security, record route, time stamp, etc..
+| Header Checksum [16] | error-checking of the header; after verification, router must calculate new checksum after decrementing the TTL field |
+| Source IP address [32] | IP address of the source device |
+| Destination IP address [32] | IP address of the destination device |
+| Options [0-] | may contain values for options such as security, record route, time stamp, etc... | -->
 
 ---
 
