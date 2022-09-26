@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include head.html %}
+
+  <body id="page-top">
+  {% include shared-nav.html %}
+  
+  <div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-3 col-md-1 mx-auto">
+        <article style="margin-top:60px">
+          <a href="#">
+            <img style="border-radius:50%;background-clip:padding-box;width:108px;height:auto;margin-bottom:.75rem;float:left;margin-right:20px;float:none;" src="{{ '/img/profile.jpg' | relative_url }}"/>
+          </a>
+          <h4 class="h4">Kevin Chang</h4>
+          <p>Software Engineer</p>
+        </article>
+        <br>
+        <table>
+          <thead>
+              <tr class="header">
+                  <th style="text-align:center">Latest Posts</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for post in site.posts %}
+            <tr>
+              <td style="text-align:center" markdown="span"><h5><a href="{{ post.url }}">{{ post.title }}</a></h5></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+			<div class="col-lg-8 col-md-10 mx-auto">
+				{{ content }}
+			</div>
+			<div class="col-lg-1 col-md-1 mx-auto"></div>
+		</div>
+	</div>
+	{% include scripts.html %}
+	{% include shared-contact.html %}
+  </body>
+</html>
