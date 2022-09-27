@@ -5,11 +5,12 @@ layout: article-default
 	<h1 class="post-title"><b>{{ page.title }}</b></h1>
 	<h4 class="post-subtitle">By: {{ page.author }}</h4>
 	<h5 class="post-subtitle">Published: {{ page.date | date_to_string }}</h5>
-	<h5 class="post-subtitle">
-		{% if page.update_date %}
-			Updated: {{ page.update_date | date_to_string }}
-		{% endif %}
-	</h5>
+	{% if page.update_date %}
+		<h5 class="post-subtitle">Updated: {{ page.update_date | date_to_string }}</h5>
+	{% endif %}
+	{% if page.tag %}
+		<h5 class="post-subtitle">Tags: {{ page.tag }}</h5>
+	{% endif %}
 	<br>
 	<hr>
 	{{ content }}
