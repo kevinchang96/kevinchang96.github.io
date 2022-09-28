@@ -9,10 +9,11 @@
 		<div class="container text-center">
 			<ul style="list-style-type:none;padding-left:0;">
 				{% for post in site.posts %}
-				<li>
-					<h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
-					<p>{{ post.excerpt }}</p>
-				</li>
+					{% if forloop.index > 8 %} {% break %} {% endif %}
+					<li>
+						<h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+						<p>{{ post.excerpt }}</p>
+					</li>
 				{% endfor %}
 			</ul>
 		</div>
