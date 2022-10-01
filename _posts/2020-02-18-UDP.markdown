@@ -3,11 +3,10 @@ layout: post
 title: "UDP"
 author: "Kevin Chang"
 date: "2020-02-18 17:00:00"
+excerpt_separator: <!--more-->
 ---
 
-User Datagram Protocol (UDP) is the sibling of TCP in that they are both transport layer protocols. However, UDP differs from TCP in many important ways. These differences result in drastically different use-cases among these two protocols. On one hand, the complex nature of TCP provides a reliable connection between two devices, while on the other hand, the simple nature of UDP provides performant, albeit unreliable transmission of data between two devices. Given this cursory description, UDP shares similar models of responsibility in that they are both connectionless protocols operating on a best-effort delivery model.
-
-<!--more-->
+User Datagram Protocol (UDP) is the sibling of TCP in that they are both transport layer protocols. However, UDP differs from TCP in many important ways. These differences result in drastically different use-cases among these two protocols. <!--more-->On one hand, the complex nature of TCP provides a reliable connection between two devices, while on the other hand, the simple nature of UDP provides performant, albeit unreliable transmission of data between two devices. Given this cursory description, UDP shares similar models of responsibility in that they are both connectionless protocols operating on a best-effort delivery model.
 
 Moreover, UDP splits data into packets called datagrams. The datagrams are then sent to the appropriate destination over IP. Unlike TCP, UDP does not require "handshakes" to open a channel of communication between devices. As a result, data can be sent to the receiving device without even an acknowledgement or agreement of communication (Yes, this is indeed perfect for DDOS-ing!). As we see, the reduced responsibility of UDP makes it perfect for situations where transmissions are time-sensitive such as Voice over IP (VoIP), online multiplayer gaming, live video streams. The keen reader may notice that UDP does not provide any datagram ordering, error control, flow control. It is precisely these lower requirements that achieve speedier transmission at the cost of many quality checks.
 

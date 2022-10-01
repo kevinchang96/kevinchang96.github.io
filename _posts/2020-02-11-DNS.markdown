@@ -3,13 +3,15 @@ layout: post
 title: "DNS"
 author: "Kevin Chang"
 date: "2020-02-11 14:50:00"
+excerpt_separator: <!--more-->
 ---
 
-Domain Name System (DNS) is the mechanism through which domain names like www.google.com is translated to the IP address of the appropriate corresponding servers. DNS is commonly analogized as a phonebook where one can look up a person's name to discover their phone number in order to reach that person. In a similar way, DNS can look up a server's domain name to discover its IP address in order to communicate with that server. This mapping implicitly requires all devices connected to the internet to have a unique IP address. Note that this discussion strictly refers to IPv4 addresses. For those interested in learning more about IPv4 (or IPv6), please refer to this discussion.
-
+Domain Name System (DNS) is the mechanism through which domain names like `www.capitalone.com` is translated to the IP address of the appropriate corresponding servers. DNS is commonly analogized as a phonebook where one can look up a person's name to discover their phone number in order to reach that person.
 <!--more-->
 
-DNS is most easily understood through a practical example highlighting all the moving components required in order to simply resolve a server's IP address. Suppose that a user wants to reach www.capitalone.com using their favorite browser.
+In a similar way, DNS can look up a server's domain name to discover its IP address in order to communicate with that server. This mapping implicitly requires all devices connected to the internet to have a unique IP address. Note that this discussion strictly refers to IPv4 addresses. For those interested in learning more about IPv4 (or IPv6), please refer to this [discussion]({% post_url 2020-02-12-IPv4 %}).
+
+DNS is most easily understood through a practical example highlighting all the moving components required in order to simply resolve a server's IP address. Suppose that a user wants to reach `www.capitalone.com` using their favorite browser.
 
 1. If the IP address of the particular domain name is not cached in the application, then a query for the IP address is routed to a recursive DNS resolver which is typically the user's Internet service provider (ISP).
  - If the IP address has already been cached by the browser, then the browser sends the original network request with the appropriate IP address.

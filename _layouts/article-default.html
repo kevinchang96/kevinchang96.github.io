@@ -4,7 +4,7 @@
 {% include head.html %}
 
   <body id="page-top">
-  {% include default-nav.html %}
+  {% include shared-nav.html %}
   
   <div class="container-fluid">
 		<div class="row">
@@ -16,6 +16,23 @@
           <h4 class="h4">Kevin Chang</h4>
           <p>Software Engineer</p>
         </article>
+        <br>
+        <table>
+          <thead>
+              <tr class="header">
+                  <th style="text-align:center">Latest Posts</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for post in site.posts %}
+              {% if post.tag == page.tag %}
+                <tr>
+                  <td style="text-align:center" markdown="span"><h5><a href="{{ post.url }}">{{ post.title }}</a></h5></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 			<div class="col-lg-8 col-md-10 mx-auto">
 				{{ content }}
@@ -24,6 +41,6 @@
 		</div>
 	</div>
 	{% include scripts.html %}
-	{% include contact.html %}
+	{% include shared-contact.html %}
   </body>
 </html>
