@@ -1,0 +1,84 @@
+---
+layout: post
+title: "SSL/TLS"
+author: "Kevin Chang"
+date: "2020-04-02 11:00:00"
+excerpt_separator: <!--more-->
+---
+
+**Secure Sockets Layer (SSL)** and **Transport Layer Security (TLS)** are security protocols that ensure encryption, authentication, and integrity in communications over the Internet.<!--more--> The former was developed in the mid-1990s by a company called NetScape. Following the release of **SSL 3.0** in 1996, **TLS 1.0** was introduced in 1999 by the Internet Engineering Task Force (IETF) as the upgrade to SSL; the name change having been predicated more on public relations (distancing from NetScape) than on dramatic differences in technical details. Given this history, the two have been used synonymously. We proceed by using TLS unless referring to specific aspects of SSL 3.0 or prior. So how does TLS work and how does it provide the aforementioned security features?
+
+TLS operates on top of [TCP]({% post_url 2020-02-16-TCP %}). So after a client finishes the TCP handshake and establishes a connection with a server, a TLS connection is initiated by the client through a TLS handshake. Similar to the TCP handshake, the TLS handshake is a 3-step procedure. Unlike the TCP handshake, this TLS handshake seeks to establish a securely encrypted channel of communication while authenticating the server in the process. 
+
+<table>
+    <colgroup>
+        <col width="10%" />
+        <col width="90%" />
+    </colgroup>
+<thead>
+    <tr class="header">
+        <th style="text-align:center">Step Number</th>
+        <th style="text-align:center">Description</th>
+    </tr>
+</thead>
+<tbody>
+    <tr height="40px">
+        <td style="text-align:center" markdown="span">1</td>
+        <td style="text-align:center" markdown="span">The client sends the server information related to the list of cipher suites and the version of SSL/TLS that it supports.</td>
+    </tr>
+    <tr height="50px">
+        <td style="text-align:center" markdown="span">2</td>
+        <td style="text-align:center" markdown="span">The server compares these with its own list of ciphers and supported SSL/TLS versions.</td>
+    </tr>
+    <tr height="50px">
+        <td style="text-align:center" markdown="span">2A</td>
+        <td style="text-align:center" markdown="span">The server selects the highest level cipher and SSL/TLS supported by both parties and sends this information back to the client along with its digital certificate containing its public key; in this case, its SSL/TLS certificate.</td>
+    </tr>
+    <tr height="50px">
+        <td style="text-align:center" markdown="span">3</td>
+        <td style="text-align:center" markdown="span">The client then verifies the authenticity of the certificate using its list of [certificate authorities (CAs)]({% post_url 2020-04-01-Certificate-Authorities %}).</td>
+    </tr>
+    <tr height="50px">
+        <td style="text-align:center" markdown="span">4</td>
+        <td style="text-align:center" markdown="span">Once verified, the client has now authenticated the server.</td>
+    </tr>
+    <tr height="45px">
+        <td style="text-align:center" markdown="span">4A</td>
+        <td style="text-align:center" markdown="span">The client will then extract the public key from the certificate and create a temporary secret key by using that public key.</td>
+    </tr>
+    <tr height="45px">
+        <td style="text-align:center" markdown="span">4B</td>
+        <td style="text-align:center" markdown="span">Next, the client will send this temporary secret key to the server.</td>
+    </tr>
+    <tr height="50px">
+        <td style="text-align:center" markdown="span">5</td>
+        <td style="text-align:center" markdown="span">Once the server receives the encrypted key, it decrypts it using its private key and uses this temporary secret key for future communications.</td>
+    </tr>
+</tbody>
+</table>
+
+<!-- In the initial request made by the client, the client sends the server information related to the list of cipher suites and the version of SSL/TLS that it supports. The server compares these with its own list of ciphers and supported SSL/TLS versions. The server selects the highest level cipher and SSL/TLS supported by both parties and sends this information back to the client along with its digital certificate containing its public key; in this case, its SSL/TLS certificate. The client then verifies the authenticity of the certificate using its list of certificate authorities (CAs). For more information on CAs, the reader may refer to this blog post on CAs. Once verified, the client has now authenticated the server. The client will then extract the public key from the certificate and create a temporary secret key by using that public key. (The temporary secret key can be as simple as encrypting a random number using the public key and using that random number as the key for future communication). Next, the client will send this temporary secret key to the server. Since it used the server’s public key to create the temporary secret key, the only entity able to decrypt the encrypted message is the entity in possession of the matching private key, presumably only held by the server. Once the server receives the encrypted key, it decrypts it using its private key and uses this temporary secret key for future communications. In this way, asymmetric encryption was used to authenticate the server, generate a temporary secret key, and share it among all involved parties. -->
+
+Note that in step **4A**, the temporary secret key can be as simple as encrypting a random number using the public key and using that random number as the key for future communication.
+
+Note that in step **4B**, since it used the server’s public key to create the temporary secret key, the only entity able to decrypt the encrypted message is the entity in possession of the matching private key, presumably only held by the server.
+
+In this way, asymmetric encryption was used to authenticate the server, generate a temporary secret key, and share it among all involved parties. Consequently, future communications using this secret key proceed as regular symmetric encryption. This process thereby reduces the overhead and increased computation from using asymmetric encryption for all messages and protects against the risk of exposing the shared secret key to third parties.
+
+If the connection breaks at any point, the process repeats to generate a new temporary secret key. Furthermore, all communications using the temporary shared secret key are signed with a message authentication code (MAC) in which the recipient can use to ensure the integrity of the data transmitted. 
+
+---
+
+|References|
+|---|
+|[Wikipedia](https://en.wikipedia.org/wiki/Transport_Layer_Security)|
+|[CSOOnline](https://www.csoonline.com/article/3246212/what-is-ssl-tls-and-how-this-encryption-protocol-works.html)|
+|[SSL](https://www.ssl.com/article/ssl-tls-handshake-overview/)|
+|[GlobalSign](https://www.globalsign.com/en/blog/ssl-vs-tls-difference)|
+|[Acunetix](https://www.acunetix.com/blog/articles/tls-security-what-is-tls-ssl-part-1/)|
+|[WebSecurity Digicert](https://www.websecurity.digicert.com/security-topics/what-is-ssl-tls-https)|
+|[CloudFare](https://www.cloudflare.com/learning/ssl/transport-layer-security-tls/)|
+|[Kinsta](https://kinsta.com/knowledgebase/tls-vs-ssl/)|
+|[SSL2Buy](https://www.ssl2buy.com/wiki/ssl-vs-tls)|
+|[HowStuffWorks](https://computer.howstuffworks.com/encryption4.htm)|
+|[TheSSLStore](https://www.thesslstore.com/new-to-ssl/what-is-ssl-tls.aspx)|
