@@ -1,0 +1,228 @@
+---
+layout: post
+title: "System Design: TinyUrl"
+author: "Kevin Chang"
+date: "2022-08-25 13:35:00"
+update_date: "2022-09-23 13:50:00"
+excerpt_separator: <!--more-->
+tag: System_Design
+---
+
+Design a service that provides short aliases for redirection of long URLs, like TinyURL.
+<!--more-->
+
+**Functional Requirements**
+1. The service should generate and return a shortened URL for a given long URL.
+2. The service should redirect the user to the original URL when a user visits the shortened URL.
+3. Users should be able to optionally pick a custom alias for their URL.
+4. Users should be able to optionally set a custom expiration time; links will expire after a specific elapsed time automatically.
+
+**Non-Functional Requirements**
+1. The system should be scalable, highly available, and performant.
+2. The generated shortened URL should be as random as possible for security purposes.
+
+**Extended Requirements**
+1. Analytics; e.g. number of redirections per day.
+2. The service should be accessible through REST APIs.
+
+---
+
+**Estimates**
+- The system will be read heavy. Users are more likely to click on a short URL and get redirected to the original URL than creating a shortened URL from a long URL. 100:1 read to write ratio.
+- The service will get 100 million requests per month on average.
+
+**Traffic Estimates**
+- 100 million URLs generated per month
+- $\frac{100 million}{1 month} * \frac{1 month}{30 days} * \frac{1 day}{24 hours} * \frac{1 hour}{3600 seconds}$ = 40 URLs/second generated
+- 100:1 read-to-write ratio
+- $100 * \frac{40 urls}{1 second}$ = 4,000 URLs/second redirections
+
+**Storage Estimates**
+- Most popular browsers support up to 2,000 characters in a URL or ~2,000 bytes.
+- Most URL shortener services create a shortened URL with 15-16 characters or ~16 bytes.
+- We might need a few more bytes to store metadata like creation timestamp, user details, etc. or ~50 bytes.
+- Total storage needed per shortened URL: ~2,100 bytes
+- Total storage needed per month: $2.1 KB * 100 million$ = 210 GB
+- Total storage needed per year: $210 GB * 12 months$ ~= 2.5 TB
+
+**Bandwidth Estimates**
+- For write requests, $2.1 KB * \frac{40 URLs}{1 second}$ ~= 80 KB per second.
+- For read requests, $2.1 KB * \frac{4000 URLs}{1 second}$ ~= 8 MB per second.
+
+---
+
+**System APIs**
+```python
+def createURL(orginalUrl: str, customUrl=None: str, expirationDate=None: datetime):
+    self.originalUrl = originalUrl
+    self.customUrl = customUrl
+    self.expirationDate = expirationDate
+```
+
+#### Parameters
+
+|     Name     |  Type  | Required |           Definition             |
+| :----------: |   :-:  |    :-:   | :------------------------------: |
+| originalUrl  |   str  |    Yes   |    The original URL to shorten   |
+|  customUrl   |   str  |    No    |        Optional custom URL       |
+|expirationDate|datetime|    No    |Optional expiration date for paste|
+
+#### Returns
+
+| Type |             Definition             |
+| :--: | :--------------------------------: |
+|  str | URL to access paste, or HTTP error |
+
+<br>
+
+```python
+def deleteURL(shortenedUrl: str):
+    self.shortenedUrl = shortenedUrl
+```
+
+#### Parameters
+
+|     Name     |  Type  | Required |           Definition             |
+| :----------: |   :-:  |    :-:   | :------------------------------: |
+| shortenedUrl |   str  |    Yes   |    The shortened URL to delete   |
+
+#### Returns
+
+| Type |               Definition               |
+| :--: | :------------------------------------: |
+| bool | True if URL was deleted, or HTTP error |
+
+---
+
+**Database Design**
+```python
+class TinyURL:
+    def __init__(self, aliasUrl: str, originalUrl: str, expirationDate: datetime):
+        self.aliasUrl = aliasUrl  # primary key
+        self.originalUrl = originalUrl
+        self.expirationDate = expirationDate
+```
+
+```python
+class User:
+    def __init__(self, userID: str, name: str, email: str):
+        self.userID = userID  # primary key
+        self.name = name
+        self.email = email
+```
+
+---
+
+**System Design**
+1. Client reaches the server. The server generates the shortened URL and returns it back as a response.
+```
+Client <-Network-> Server
+```
+
+2. Maintain a database to store the shortened URL to long URL mappings.
+```
+Client <-Network-> Server <---> Database
+```
+
+3. Scale vertically (adequate CPU and memory) and horizontally (adequate demand) depending on cost estimates.
+```
+Client <-Network-> Multiple Servers <---> Database
+```
+
+4. Include a load balancer in front to interpret requests and redirect them to available servers. This distributes the load of requests across servers and provides a single point of contact for users (also a single point of failure!).
+```
+Client <-Network-> Load Balancer <--> Multiple Servers <---> Database
+```
+
+4. Cache frequently accessed shortened URLs to improve response time and reduce the load on the database.
+```
+Client <-Network-> Load Balancer <--> Multiple Servers <--Cache--> Database
+```
+
+---
+
+**Short URL Logic**
+
+We can generate random characters using algorithms like `base62` or `MD5`. Both `base62` and `MD5` algorithm outputs consist of 62 character combinations (`a-z A-Z 0-9`).
+
+**MD5 Algorithm (Unideal)**
+- `MD5` takes a string as input and produces a fixed-length output.
+- The algorithm mostly produces unique output, but there is a rare chance of it producing the same output for two different inputs.
+- The algorithm produces a really long output which does not fit the requirements.
+- Considering only the first `n` characters of the output increases the chances for collisions.
+
+**Base62 Algorithm (Unideal)**
+- `Base62` takes an integer input.
+- The service must first convert the long URL to a random number, then pass it to the `base62` algorithm.
+- The service must regenerate a random number if the number had been used in the past.
+- Inefficiencies above are further complicated by multiple server systems maintaining a consistent database.
+
+**Counter-Based Approach (Ideal)**
+- Use an incrementing counter to pass to the `base62` algorithm instead of using a random number.
+- The incrementing counter service can be a single point of failure.
+
+**Zookeeper**
+- An open-sourced distributed service used for maintaining configurations, managing coordination between services in a cluster, distributed synchronization, naming nodes in a cluster, and providing a shared counter.
+- Each new server will be assigned a range of values by zookeeper. If a server runs out of the counter range assigned to it, zookeeper assigns it a new range.
+- If a counter node fails, zookeeper automatically spins up a new counter instance.
+
+**Database**
+- Only need to store the shortened URL to long URL mapping.
+- No need to perform any relational queries or joins to store or retrieve data.
+- Our service uses a simple No-SQL key-value mapping.
+- Some popular ones are Amazon DynamoDB, Oracle NoSQL Database, etc.
+
+---
+
+**Final Design**
+```
+Client <-Network-> Load Balancer <--> Multiple Servers <--Cache--> Database
+                                            |--------------------> Zookeeper
+```
+
+**URL Shortening Request**
+1. The client reaches our service with a request to shorten `www.google.com` and hits the load balancer.
+2. The load balancer forwards the request to the appropriate, available server.
+3. The server performs the following steps:
+- Contact zookeeper to get the counter value and passes the counter value as input to the `base62` algorithm.
+- `Base62` returns a unique random string which is appended as a path to create a shortened URL.
+- This long URL to shortened URL mapping is stored in the database.
+
+**User Link Redirection**
+1. The client makes a request for the shortened URL adn the request hits the load balancer.
+2. The load balancer forwards the request to the appropriate, available server.
+3. The server performs the following steps:
+- Extract the path (shortened URL).
+- Using this random string, retrieve the corresponding long URL from the (cache or) database.
+- Redirect the request to the original long URL destination address.
+- Save the shortened URL to long URL mapping in the cache (if not present).
+
+---
+
+**Appendix**
+
+**Base62 Algorithm**
+
+```python
+def encode62(n: int) -> str:
+    mapping = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    encoding = []
+    while n:
+        encoding.append(mapping[n%62]) 
+        n /= 62
+    # reverse the encoding to complete base conversion
+    return "".join(encoding[::-1])
+
+def decode62(code: str) -> int:
+    n = 0
+    for c in code:
+        n *= 62
+        val = ord(c)
+        if ord('a') <= val <= ord('z'):
+            val += (val-ord('a'))
+        elif ord('A') <= val <= ord('Z'):
+            val += (val-ord('A')) + 26
+        elif ord('0') <= val <= ord('9'):
+            val += (val-ord('0')) + 52
+    return n
+```
