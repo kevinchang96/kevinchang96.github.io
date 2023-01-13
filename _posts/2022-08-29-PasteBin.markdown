@@ -1,0 +1,186 @@
+---
+layout: post
+title: "System Design: PasteBin"
+author: "Kevin Chang"
+date: "2022-08-29 19:42:00"
+update_date: "2022-09-15 16:08:00"
+excerpt_separator: <!--more-->
+tag: System_Design
+---
+
+Design a web service where users can store plain text, like Pastebin.
+<!--more-->
+
+**Functional Requirements**
+1. Users should be able to upload their data and get a unique URL to access it.
+2. Users will only be able to upload text.
+3. Users should also be able to specify an expiration time, otherwise data and links should expire after a default time period.
+4. Users should be able to pick a custom alias for their upload.
+
+**Non-Functional Requirements**
+1. The system should be highly reliable, any uploaded data should not be lost.
+2. The system should be highly available.
+3. Users should be able to access their uploads in real-time with minimal latency.
+4. Upload links should not be predictable.
+
+**Extended Requirements**
+1. Analytics
+2. The service should also be accessible through REST APIs by other services.
+
+---
+
+**Estimates**
+- The system will be read heavy. Users are more likely to read requests than to create new uploads. 5:1 read-write-ratio.
+
+**Traffic Estimates**
+- 1 million new uploads per day. 5 million reads per day.
+- $\frac{1 million uploads}{1 day} * \frac{1 day}{24 hours} * \frac{1 hour}{3600 seconds}$ ~= 12 uploads/second
+- $\frac{5 million uploads}{1 day} * \frac{1 day}{24 hours} * \frac{1 hour}{3600 seconds}$ ~= 58 reads/second
+
+**Storage Estimates**
+- The service will limit users to a maximum of 10 MB of data per upload.
+- The average upload can be 10 KB.
+- Total storage needed per day: 10 GB
+- Total storage needed per month: 300 GB 
+- Total storage needed per year: 3.65 TB
+- The service will generate unique links for each upload; each unique link path can take 8 characters/bytes.
+- Total storage needed per upload link: 8 bytes
+- Total storage needed per day: $8 bytes * 1 million$ = 8 MB
+- Total storage needed per month: $8 bytes * 30 million$ = 240 MB
+- Total storage needed per year: $240 MB * 12 months$ ~= 2.88 GB
+- Total storage needed for 10 years: $2.9 GB * 10 years$ ~= 29 GB
+
+**Bandwidth Estimates**
+- For **write requests**, 12 new uploads/second with max incoming data per upload of 10 KB: $\frac{10 KB}{1 upload} * \frac{12 uploads}{1 second}$ = 120 KB/second
+- For **read requests**, 58 reads/second with max outgoing data per read of 10 KB: $\frac{10 KB}{1 read} * \frac{58 reads}{1 second}$ = 580 KB/second = 0.58 MB/second
+
+**Memory Estimates**
+- Following the 80-20 rule, 20% of popular uploads generate 80% of traffic.
+- Since we have 5 million read requests per day, in order to cache 20% of these requests we would need to cache: $0.2 * 5 million * 10 KB$ = 10 GB.
+
+---
+
+**System APIs**
+
+```python
+def addPaste(pasteContents: str, customUrl=None: str, customName=None: str, expirationDate=None: datetime)
+```
+#### Parameters
+
+|     Name     |  Type  | Required |           Definition             |
+| :----------: |   :-:  |    :-:   | :------------------------------: |
+|pasteContents |   str  |    Yes   |        Text data to paste        |
+|  customUrl   |   str  |    No    |        Optional custom URL       |
+|  customName  |   str  |    No    |   Optional custom name of paste  |
+|expirationDate|datetime|    No    |Optional expiration date for paste|
+
+#### Returns
+
+| Type |             Definition             |
+| :--: | :--------------------------------: |
+|  str | URL to access paste, or HTTP error |
+
+<br>
+
+```python
+def getPaste(pasteKeyPath: str)
+```
+
+#### Parameters
+
+|     Name     |  Type  | Required |           Definition             |
+| :----------: |   :-:  |    :-:   | :------------------------------: |
+| pasteKeyPath |   str  |    Yes   |     Url path/key to the paste    |
+
+#### Returns
+
+| Type |             Definition             |
+| :--: | :--------------------------------: |
+|  str |   Saved paste data, or HTTP error  |
+
+<br>
+
+```python
+def deletePaste(pasteKeyPath: str)
+```
+#### Parameters
+
+|     Name     |  Type  | Required |           Definition             |
+| :----------: |   :-:  |    :-:   | :------------------------------: |
+| pasteKeyPath |   str  |    Yes   |     Url path/key to the paste    |
+
+#### Returns
+
+| Type |                 Definition                 |
+| :--: | :----------------------------------------: |
+| bool | True if paste was deleted, false otherwise |
+
+---
+
+**Database Design**
+```python
+class Paste:
+    def __init__(self, pasteKeyPath: str, creationDate: datetime, userID=None: str, expirationDate=None: datetime):
+        self.pasteKeyPath = pasteKeyPath  # primary key
+        self.creationDate = creationDate
+        self.userID = userID
+        self.expirationDate = expirationDate
+```
+
+```python
+class User:
+    def __init__(self, userID: str, name: str, email: str):
+        self.userID = userID  # primary key
+        self.name = name
+        self.email = email
+```
+
+---
+
+**High-Level Design**
+- The application layer will direct and serve read and write requests.
+- The database layer will store metadata in tables and paste contents in block storage.
+- This allows each to scale individually.
+
+---
+
+**Component Design**
+
+**Application Layer**
+- Application servers will process incoming and outgoing paste requests
+
+`Paste Generation`
+- Generate hashkey and map to server
+  1. The application server will generate a random hash key which would serve as the url path to the paste (if no custom key was provided)
+  2. The application server will store the generated key mapping in the metadata database and store the paste contents in the object storage.
+  3. After successful insertion, the server will return the url path of the paste to the user.
+  - Possible problems
+    - Insertion may fail due to a duplicate key.
+    - Randomly generated keys may result in hash key collisions.
+  - Potential solutions
+    - Regenerate a new random hash key in case of duplicates.
+    - Keep retrying as necessary.
+    - Return an error if the custom key is a duplicate.
+- Key Generation Service
+  1. A separate key generation microservice will handle generating unique hash keys.
+  2. The service can use a distributed file storage like HDFS or EFS to keep track of unused generated keys.
+  3. The service can use a distributed key-value storage like DynamoDB or Cassandra to store used generate keys and metadata about the paste.
+  4. Each time an unused generated key is used, it is removed from the unused key table and added to the used key database.
+  - Possible problems
+    - Single point of failure
+  - Possible solutions
+    - The service can be placed in an autoscaling group behind a load 
+    baalncer.
+
+`Paste Retrieval`
+- Based on the request, the application server will parse the url path for the key path to the paste contents in object storage.
+- The application server will retrieve the contents from the object storage and return it to the user if found. Otherwise, an error is returned.
+
+**Database Layer**
+- We can divide the database layer into two types of databases:
+  1. User/Metadata database: use a relational database like MySQL or a distributed key-value store like DynamoDB or Cassandra.
+  2. Content database: use a distributed file storage system like HDFS or an object storage like S3.
+- Additionally, we can have caches in front of both storages to accelerate retrieval of frequently requested pastes.
+
+**Data Partitioning and Replication**
+- Similar to the [TinyUrl Design]({% post_url 2022-08-25-TinyUrl %})
